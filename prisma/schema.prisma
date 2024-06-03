@@ -1,0 +1,99 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Users {
+  id        String   @id @default(uuid())
+  username  String
+  email     String
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  reviews  Reviews[]
+  builders Builders[]
+
+  @@map("users")
+}
+
+model Components {
+  id              String            @id @default(uuid())
+  brand           String
+  model           String
+  description     String
+  price           String
+  stock           String
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  reviews         Reviews[]
+  buildComponents BuildComponents[]
+
+  categoryId   String
+  categoryName Categories @relation(fields: [categoryId], references: [id])
+
+  @@map("components")
+}
+
+model Categories {
+  id           String       @id @default(uuid())
+  categoryName String
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  components   Components[]
+
+  @@map("categories")
+}
+
+model Reviews {
+  id        String   @id @default(uuid())
+  comment   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String
+  users  Users  @relation(fields: [userId], references: [id])
+
+  componentId String
+  components  Components @relation(fields: [componentId], references: [id])
+
+  @@map("reviews")
+}
+
+model BuildComponents {
+  id        String   @id @default(uuid())
+  quantity  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  builderId String
+  builders  Builders @relation(fields: [builderId], references: [id])
+
+  componentId String
+  components  Components @relation(fields: [componentId], references: [id])
+
+  @@map("buildComponents")
+}
+
+model Builders {
+  id String @id @default(uuid())
+
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  buildComponents BuildComponents[]
+
+  userId String
+  users  Users  @relation(fields: [userId], references: [id])
+
+  @@map("builders")
+}
