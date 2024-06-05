@@ -4,6 +4,7 @@ import httpStatus from "http-status"
 import sendResponse from "../../../shared/sendResponse"  
 import { Components } from "@prisma/client"
 import { componentService } from "./component.service"
+import pick from "../../../shared/pick"
 
 const createComponents: RequestHandler = catchAsync(
     async (req: Request, res: Response) => {
@@ -18,17 +19,23 @@ const createComponents: RequestHandler = catchAsync(
       })
     },
   ) 
+
+  
   
   const getAllComponents: RequestHandler = catchAsync(
     async (req: Request, res: Response) => { 
 
-      const result = await componentService.getAllComponent();
+      const filter = pick(req.query, ["searchTerm", "brand", "model", "category"]);
+      const paginationOptions = pick(req.query, ["page", "limit", "skip", "sortBy", "sortOrder"]);
+
+      const result = await componentService.getAllComponent(filter, paginationOptions);
   
-      sendResponse<Components[]>(res, {
+      sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
-        message: 'All component show successfully!',
-        data: result,
+        message: 'All component show successfully!', 
+        data: result.data,
+        meta: result.meta,
       })
     },
   ) 
